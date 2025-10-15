@@ -1,27 +1,34 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
 
 public class pepasm {
     //Currently, this function only works for ascii values formatted as 0x0034, so if you put 0x34 or 0x034, it will not format correctly.
     // TODO: Add support for hex values formatted as 0x34 or 0x034.
     //TODO: it doesn't also support labels, and branch instructions like BRNE because BRNE references the memory location of the next instruction, which i don't know how to handle yet but i will ask the prof, tomorrow.
      static void conversion(Map<String, Map<String, String>> map, String line) {
-        String[] words = line.trim().split("\\s+");
+        String[] words = line.trim().split("[\\s,]+");
         Map<String, String> main = map.get(words[0]);
         if (main == null) System.out.println("Cmd not found");
         assert main != null;
          String sub;
          String ascii = "";
         if (words.length > 1){
-             sub = main.get(words[2]);
-             ascii = words[1].replace("0x", "")
-                     .replaceAll("(.{2})", "$1 ")
-                     .trim();
+            String operand = words[1].replace("0x", ""); // trims 0x from operand
+
+            while (operand.length() < 4){
+                operand = "0" + operand;
+            }
+
+             ascii = operand.replaceAll("(.{2})", "$1 ").trim();
+            String mode = (words.length > 2) ? words[2] : "default";
+            sub = main.get(mode);
          } else {
             sub = main.get("default");
         }
-        System.out.print(sub + " " + ascii.replace(",", ""));
+        System.out.print(sub + " " + ascii);
      }
     public static void main(String[] args) {
         if (args.length < 1) {
