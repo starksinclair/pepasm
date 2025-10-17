@@ -6,25 +6,7 @@ public class pepasm {
     static String cleanString(String s) {
         return s.replaceAll("[: ,]+$", ""); // drops trailing ':', ',' and spaces
     }
-    /**
-     * Converts a 16-bit hexadecimal literal to a big-endian byte string "HH LL".
-     * <p>
-     * Accepts inputs with or without a {@code 0x} / {@code 0X} prefix and with or without
-     * leading zeros, e.g. {@code "0x0040"}, {@code "0x40"}, {@code "0040"}, {@code "40"}.
-     * Only the least-significant 16 bits are kept.
-     *
-     * <p><b>Examples:</b>
-     * <pre>{@code
-     * toBigEndianBytes("0x0041") -> "00 41"
-     * toBigEndianBytes("0xFC16") -> "FC 16"
-     * toBigEndianBytes("0040")   -> "00 40"
-     * }</pre>
-     *
-     * @param hex a hex string representing a value (optionally prefixed with {@code 0x}).
-     *            Must contain only hexadecimal digits after the optional prefix.
-     * @return a two-byte big-endian representation formatted as {@code "HH LL"}.
-     * @throws IllegalArgumentException if {@code hex} is empty.
-     */
+    
     static String toBigEndianBytes(String hex) {
         if (hex.isEmpty()) {
             throw new IllegalArgumentException("Please enter a valid hexadecimal string");
@@ -34,45 +16,7 @@ public class pepasm {
         int lo = v & 0xFF;
         return String.format("%02X %02X", hi, lo);
     }
-    /**
-     * Assembles a single source line into machine code.
-     * <p>
-     *
-     * <h3>Behavior</h3>
-     * <ul>
-     *   <li>Looks up the opcode in {@code instructionsMap} to obtain the hexadecimal opcode byte
-     *       for the specified addressing mode (or the {@code "default"} form).</li>
-     *   <li>Operands that look like hex literals (e.g., {@code 0x0040}, {@code 0040}, {@code 40})
-     *       are converted to a two-byte big-endian string via {@code toBigEndianBytes}, otherwise
-     *       the operand is used as-is (e.g., labels).</li>
-     *   <li>If the first token is not found in {@code instructionsMap}, it is treated as a label and
-     *       the second token must be the opcode. The label is recorded in {@code branchesMap} with
-     *       the opcode hex at which it appears.</li>
-     *   <li>After formatting, each emitted byte token (opcode and operand bytes) is inserted into
-     *       {@code binaryCounter} with the current counter encoded as {@code "00 XX"}. The counter
-     *       is then incremented and wrapped to 8 bits: {@code (counter + 1) & 0xFF}.</li>
-     *   <li>If {@code operandHex} matches a key in {@code branchesMap}, the operand is replaced
-     *       by the corresponding entry from {@code binaryCounter} (label/branch resolution step).</li>
-     *   <li>Emits the final bytes to {@code System.out} in the form {@code "OP OPERAND... "}.</li>
-     * </ul>
-     *
-     * <h3>Notes</h3>
-     * <ul>
-     *   <li>{@code instructionsMap} uses <b>opcode</b> as the key (e.g., {@code "LDBA"}),
-     *       and maps addressing modes (e.g., {@code "i"}, {@code "d"}) to the
-     *       opcode hex string (e.g., {@code "D0"}).</li>
-     *   <li>{@code cleanString} is used to strip punctuation such as commas from tokens.</li>
-     *   <li>On lookup failures (unknown opcode or addressing mode), the method prints an error message
-     *       and returns the input {@code counter} unchanged.</li>
-     * </ul>
-     *
-     * @param instructionsMap mapping of opcode → (addressMode → opcode hex), e.g. {@code LDBA → { i: D0, d: D2 }}
-     * @param line            a single source line to assemble (maybe label-first or opcode-first)
-     * @param branchesMap     mapping of label → opcode hex at label location (used for branch/label resolution)
-     * @param binaryCounter   mapping of each emitted byte token → its assembled address string {@code "00 XX"}
-     * @param counter         current 8-bit program counter; incremented per emitted byte and wrapped via {@code & 0xFF}
-     * @return                updated {@code counter} after emitting this line’s bytes
-     */
+
      static int conversion(Map<String, Map<String, String>> instructionsMap, String line, Map<String, String> branchesMap, Map<String, String> binaryCounter, int counter) {
         String[] words = line.trim().split("\\s+");
         Map<String, String> row = instructionsMap.get(words[0]);
